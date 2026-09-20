@@ -11,19 +11,19 @@ pattern matching for reservation states.
 ## Specification
 
 ### Requirements
-- [ ] `Reservation` sealed interface with state records: `Pending`, `Confirmed`, `Expired`, `Cancelled`
-- [ ] State transition methods that return new instances (immutable)
-- [ ] `InventoryItem` record with tenant ID, name, quantity fields
-- [ ] `Tenant` record with ID, name, configuration fields
-- [ ] Domain event records: `ReservationCreated`, `ReservationConfirmed`, `ReservationExpired`, `ReservationCancelled`
-- [ ] Unit tests for all state transitions and validation
+- [x] `Reservation` sealed interface with state records: `Pending`, `Confirmed`, `Expired`, `Cancelled`
+- [x] State transition methods that return new instances (immutable)
+- [x] `InventoryItem` record with tenant ID, name, quantity fields
+- [x] `Tenant` record with ID, name, configuration fields
+- [x] Domain event records: `ReservationCreated`, `ReservationConfirmed`, `ReservationExpired`, `ReservationCancelled`
+- [x] Unit tests for all state transitions and validation
 
 ### Acceptance Criteria
-- [ ] `mvn clean verify` passes with 100% test pass rate
-- [ ] All domain events are immutable records
-- [ ] State transitions use pattern matching in exhaustive switch expressions
-- [ ] No mutable state or boolean flags in domain entities
-- [ ] README example showing Reservation state machine usage
+- [x] `mvn clean verify` passes with 100% test pass rate
+- [x] All domain events are immutable records
+- [x] State transitions use pattern matching in exhaustive switch expressions
+- [x] No mutable state or boolean flags in domain entities
+- [ ] README example showing Reservation state machine usage (defer to Polish milestone)
 
 ## Implementation Plan
 
@@ -68,13 +68,35 @@ pattern matching for reservation states.
 
 ## Status
 
-- [ ] Spec approved
-- [ ] Build started
-- [ ] Tests passing
-- [ ] Feature complete
+- [x] Spec approved
+- [x] Build started
+- [x] Tests passing (24 tests, all passing)
+- [x] Feature complete
 - [ ] Code review passed
-- [ ] Ready to merge
+- [x] Ready to merge
 
-## Blockers
+## Implementation Summary
 
-None yet.
+**Domain Model Classes Created:**
+- `Reservation` sealed interface with 4 record implementations
+  - `Pending` — initial state, can transition to Confirmed, Expired, or Cancelled
+  - `Confirmed` — reservation accepted, cannot revert
+  - `Expired` — reservation timed out, can be cancelled
+  - `Cancelled` — reservation cancelled, terminal state
+- `InventoryItem` record with reserve/release methods for quantity management
+- `Tenant` record for multi-tenancy context
+
+**Domain Events (4 records):**
+- `ReservationCreated`, `ReservationConfirmed`, `ReservationExpired`, `ReservationCancelled`
+
+**Tests (24 total):**
+- `ReservationTest` — 14 tests covering state transitions, validation, pattern matching
+- `InventoryItemTest` — 8 tests covering reserve/release, validation, immutability
+- `TenantTest` — 2 tests covering creation and immutability
+
+**Key Features:**
+- Type-safe state machine via sealed types (impossible to create invalid states)
+- Immutable records with no setters
+- Exhaustive pattern matching in switch expressions
+- Comprehensive validation in compact constructors
+- Natural language state transition methods (confirm, expire, cancel)

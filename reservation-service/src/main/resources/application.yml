@@ -1,0 +1,32 @@
+quarkus:
+  app:
+    name: reservation-service
+    version: 1.0.0-SNAPSHOT
+  server:
+    port: 8083
+  datasource:
+    db-kind: postgresql
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/loomcrete_reservation
+      driver: org.postgresql.Driver
+    username: loomcrete
+    password: loomcrete-dev
+  devservices:
+    enabled: false
+  hibernate-orm:
+    database:
+      generation: drop-and-create
+    show-sql: false
+  http:
+    port: 8083
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    root: INFO
+    dev.noe.loomcrete: DEBUG

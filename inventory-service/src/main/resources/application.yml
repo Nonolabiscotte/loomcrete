@@ -1,0 +1,32 @@
+quarkus:
+  app:
+    name: inventory-service
+    version: 1.0.0-SNAPSHOT
+  server:
+    port: 8082
+  datasource:
+    db-kind: postgresql
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/loomcrete_inventory
+      driver: org.postgresql.Driver
+    username: loomcrete
+    password: loomcrete-dev
+  devservices:
+    enabled: false
+  hibernate-orm:
+    database:
+      generation: drop-and-create
+    show-sql: false
+  http:
+    port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    root: INFO
+    dev.noe.loomcrete: DEBUG

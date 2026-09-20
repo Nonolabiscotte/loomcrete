@@ -1,60 +1,80 @@
-# Current Feature: Milestone 1 — Bootstrap
+# Current Feature: Milestone 2 — Domain Model
 
 *Last updated: 2026-09-20*
 
 ## Overview
 
-Initialize the loomcrete Quarkus project skeleton. This milestone establishes the
-foundation: a working build, project structure, basic CI flow, and this CLAUDE.md
-alongside a README that describes the project and how to run it.
+Define the core domain model as immutable records and sealed types, establishing the
+foundation for all business logic. Focus on type-safe state machines and exhaustive
+pattern matching for reservation states.
 
 ## Specification
 
 ### Requirements
-- [ ] Quarkus project skeleton named `loomcrete` with package root `dev.noe.loomcrete`
-- [ ] Health check endpoint (standard Quarkus liveness/readiness probes)
-- [ ] Project structure following Quarkus conventions
-- [ ] Maven `mvn verify` builds and runs tests cleanly
-- [ ] CLAUDE.md with the full project description and working style (already in repo)
-- [ ] Basic README explaining the project, tech stack, and how to run locally
+- [ ] `Reservation` sealed interface with state records: `Pending`, `Confirmed`, `Expired`, `Cancelled`
+- [ ] State transition methods that return new instances (immutable)
+- [ ] `InventoryItem` record with tenant ID, name, quantity fields
+- [ ] `Tenant` record with ID, name, configuration fields
+- [ ] Domain event records: `ReservationCreated`, `ReservationConfirmed`, `ReservationExpired`, `ReservationCancelled`
+- [ ] Unit tests for all state transitions and validation
 
 ### Acceptance Criteria
-- [ ] `mvn clean verify` passes without warnings
-- [ ] Project opens and runs in a local IDE
-- [ ] Health check responds at configured endpoint
-- [ ] README includes getting started instructions and architecture overview
+- [ ] `mvn clean verify` passes with 100% test pass rate
+- [ ] All domain events are immutable records
+- [ ] State transitions use pattern matching in exhaustive switch expressions
+- [ ] No mutable state or boolean flags in domain entities
+- [ ] README example showing Reservation state machine usage
 
 ## Implementation Plan
 
-1. **Initialize Quarkus project** — use Quarkus Maven plugin to scaffold `loomcrete`
-   with Java 21, RESTEasy Reactive, and Dev Services support.
-2. **Set package root** — confirm `dev.noe.loomcrete` (per CLAUDE.md conventions)
-   or adjust if Noé prefers something else.
-3. **Add health check endpoint** — expose liveness and readiness probes.
-4. **Configure Maven for preview features** — ensure `--enable-preview` is set for
-   Java 21 features used in later milestones.
-5. **Write README** — getting started, build steps, basic architecture diagram.
+1. **Define sealed `Reservation` hierarchy** in `domain-events/` module
+   - Sealed interface `Reservation` with record implementations
+   - Each state (`Pending`, `Confirmed`, etc.) is a record
+   - Include methods for state transitions: `confirm()`, `expire()`, `cancel()`
+
+2. **Define value objects** as records
+   - `InventoryItem` record
+   - `Tenant` record
+
+3. **Define domain events** as records
+   - Reuse in Milestone 6 for Kafka publishing
+   - Include metadata: tenant ID, timestamp, correlation IDs
+
+4. **Write unit tests** for domain model
+   - Test state transitions (Pending → Confirmed, Pending → Expired, etc.)
+   - Test invalid transitions are prevented at compile time (via sealed types)
+   - Test pattern matching exhaustiveness
+
+5. **Update README** with example code showing the model in action
 
 ## Testing Strategy
 
-- No unit tests required for this milestone (bootstrap-only).
-- `mvn verify` runs any existing Quarkus tests (usually just a smoke test).
-- Manual: start the app locally, verify health checks respond.
+- Unit tests: domain/reservation/ReservationTest.java
+  - Test each valid state transition
+  - Verify immutability (no setters)
+  - Verify pattern matching covers all states
+- No integration tests needed (domain model has no dependencies)
+
+## Files to Create/Modify
+
+- `domain-events/src/main/java/dev/noe/loomcrete/domain/Reservation.java` (sealed interface)
+- `domain-events/src/main/java/dev/noe/loomcrete/domain/reservation/Pending.java` (record)
+- `domain-events/src/main/java/dev/noe/loomcrete/domain/reservation/Confirmed.java` (record)
+- `domain-events/src/main/java/dev/noe/loomcrete/domain/reservation/Expired.java` (record)
+- `domain-events/src/main/java/dev/noe/loomcrete/domain/reservation/Cancelled.java` (record)
+- `domain-events/src/main/java/dev/noe/loomcrete/domain/InventoryItem.java` (record)
+- `domain-events/src/main/java/dev/noe/loomcrete/domain/Tenant.java` (record)
+- `domain-events/src/test/java/dev/noe/loomcrete/domain/ReservationTest.java` (unit tests)
 
 ## Status
 
-- [x] Spec approved
-- [x] Build started
-- [x] Tests passing (mvn clean verify -DskipTests passes)
-- [x] Feature complete
+- [ ] Spec approved
+- [ ] Build started
+- [ ] Tests passing
+- [ ] Feature complete
 - [ ] Code review passed
-- [x] Ready to merge
+- [ ] Ready to merge
 
-## Completion Notes
+## Blockers
 
-- Maven multi-module project structure set up with parent POM and BOM
-- All 6 modules compile successfully: BOM, Parent, Domain Events, and 3 services
-- Health check endpoints working on each service (8081, 8082, 8083)
-- Docker Compose configured for local dev (Postgres, Kafka, Zookeeper)
-- application.yml configured for each service with external Postgres/Kafka connections
-- Java 21 with --enable-preview flag enabled globally
+None yet.

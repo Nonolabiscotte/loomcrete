@@ -81,6 +81,18 @@
             <artifactId>loomcrete-domain-events</artifactId>
         </dependency>
 
+        <!-- Service dependencies for structured concurrency example -->
+        <dependency>
+            <groupId>dev.noe</groupId>
+            <artifactId>inventory-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.noe</groupId>
+            <artifactId>tenant-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>io.quarkus</groupId>

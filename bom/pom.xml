@@ -105,6 +105,18 @@
                 <artifactId>loomcrete-domain-events</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <!-- Microservices -->
+            <dependency>
+                <groupId>dev.noe</groupId>
+                <artifactId>inventory-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.noe</groupId>
+                <artifactId>tenant-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

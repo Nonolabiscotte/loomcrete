@@ -1,77 +1,65 @@
-# Current Feature: Milestone 3 — Persistence
+# Current Feature: Milestone 4 — Virtual Threads
 
-*Last updated: 2026-09-20*
+*Last updated: 2026-09-21*
 
 ## Overview
 
-Wire up blocking JDBC Panache repositories for each service, implement basic CRUD operations,
-and configure Dev Services to spin up PostgreSQL containers for local development. This milestone
-bridges the domain model to the database, establishing data access patterns for all subsequent
-features.
+Apply `@RunOnVirtualThread` to blocking persistence operations, verifying that JDBC calls are
+dispatched onto virtual threads instead of platform threads. This unlocks the core advantage of
+Java 21 virtual threads: high concurrent load without manual thread-pool tuning.
 
 ## Specification
 
 ### Requirements
-- [ ] `TenantRepository` Panache repository with CRUD operations
-- [ ] `InventoryRepository` Panache repository with CRUD operations + `findByTenantId()`
-- [ ] `ReservationRepository` Panache repository with CRUD operations + `findByTenantId()`, `findByStatus()`
-- [ ] JPA entities mapping domain records to database tables
-- [ ] Hibernate configuration for blocking JDBC + virtual thread dispatching
-- [ ] Dev Services configuration (Postgres container per service, auto-start on `mvn quarkus:dev`)
-- [ ] Database initialization scripts (schema + optional seed data)
-- [ ] Integration tests using `@QuarkusTest` with Dev Services
+- [ ] Apply `@RunOnVirtualThread` annotation to repository query/persist methods or service layer
+- [ ] Verify JDBC calls execute on virtual threads (via logging/tracing)
+- [ ] Confirm dev mode works: `mvn quarkus:dev` without blocking issues
+- [ ] Short load test: demonstrate throughput improvement vs platform threads (optional)
+- [ ] Document virtual thread configuration and behavior in README
 
 ### Acceptance Criteria
-- [ ] `mvn clean verify` passes with all repository tests
-- [ ] Each service's database is isolated (separate schema or database)
-- [ ] CRUD operations work end-to-end (create, read, update, delete)
-- [ ] Multi-tenancy scoping enforced (queries filtered by tenant ID)
-- [ ] Database transactions are implicit (Panache default)
-- [ ] Dev Services auto-starts Postgres on `mvn quarkus:dev`
+- [ ] `mvn clean verify` passes
+- [ ] All integration tests pass with virtual thread dispatcher
+- [ ] No deadlocks or thread starvation observed
+- [ ] Load test (if run) shows improved throughput or same throughput with lower footprint
 
 ## Implementation Plan
 
-1. **Create JPA entities** (in domain-events or service-specific persistence packages)
-   - Map `Reservation` states to a single entity with a status column or use TABLE_PER_CLASS
-   - Map `InventoryItem` and `Tenant` records to entities
+1. **Understand virtual thread integration**
+   - Quarkus automatically dispatches blocking Panache/JDBC onto virtual threads when enabled
+   - `@RunOnVirtualThread` can be applied at REST endpoint or service layer
+   - No code changes to repositories needed (just verification/documentation)
 
-2. **Create Panache repositories** (one per service)
-   - `TenantRepository extends PanacheRepository<Tenant, String>`
-   - `InventoryRepository extends PanacheRepository<InventoryItem, String>`
-   - `ReservationRepository extends PanacheRepository<Reservation, String>`
-   - Add query methods: `findByTenantId()`, `findByStatus()`, etc.
+2. **Enable and verify virtual thread dispatch**
+   - Check Quarkus config for virtual thread dispatcher (may be default in 3.8.6)
+   - Run integration tests and confirm no blocking issues
+   - Optional: add logging to show virtual thread IDs in test output
 
-3. **Configure Hibernate ORM** in each service's application.yml
-   - `quarkus.hibernate-orm.database.generation=drop-and-create` (dev)
-   - `quarkus.datasource.jdbc.url`, username, password
-   - `quarkus.datasource.devservices.enabled=true` for Postgres containers
+3. **Document the pattern**
+   - Explain why: blocking I/O on virtual threads is efficient, not wasteful
+   - Contrast with reactive persistence (more complex, not needed here)
+   - Mention preview API usage if structured concurrency is added later
 
-4. **Write integration tests** using `@QuarkusTest`
-   - Test CRUD operations
-   - Test multi-tenancy filtering
-   - Verify database state after operations
-
-5. **Document** database schema and setup in README
+4. **Performance observation** (optional)
+   - Run a load test: create/read reservations under concurrent load
+   - Measure: throughput, latency, thread count
+   - Document comparison if done
 
 ## Testing Strategy
 
-- Unit tests: existing domain model tests remain unchanged
-- Integration tests: `@QuarkusTest` per service
-  - Repository CRUD operations
-  - Query filtering by tenant ID
-  - Transaction behavior (rollback on error, commit on success)
-- Dev Services: verify Postgres container starts on `mvn quarkus:dev`
+- Unit tests: no changes (domain model unchanged)
+- Integration tests: run existing @QuarkusTest tests, confirm no blocking
+- Load test (optional): concurrent reservation creation/read, measure latency
+- Dev mode: `mvn quarkus:dev`, interact with services, confirm no hangs
 
 ## Files to Create/Modify
 
-**Per-service (tenant-service example):**
-- `tenant-service/src/main/java/dev/noe/loomcrete/tenant/infrastructure/TenantEntity.java` (JPA)
-- `tenant-service/src/main/java/dev/noe/loomcrete/tenant/infrastructure/TenantRepository.java` (Panache)
-- `tenant-service/src/test/java/dev/noe/loomcrete/tenant/infrastructure/TenantRepositoryTest.java`
-- Update `src/main/resources/application.yml` with Hibernate/datasource config
+**Per-service (if adding @RunOnVirtualThread):**
+- REST endpoints or service layer (to be created in Milestone 5)
+- application.yml (verify/document virtual thread config)
 
-**Shared:**
-- Update `docker-compose.local.yml` to initialize schemas for each service
+**Documentation:**
+- README: add section explaining virtual thread usage and why it matters
 
 ## Status
 
@@ -88,9 +76,7 @@ None yet.
 
 ## Notes
 
-- Reservation entity modeling: consider using single `status` column + state factory methods
-  vs. TABLE_PER_CLASS inheritance (simpler queries with status column approach)
-- Dev Services: one Postgres container per service (via separate datasources) or shared?
-  Plan: shared single Postgres, separate schemas for each service (easier locally)
-- Virtual thread interaction: Panache + blocking JDBC should work seamlessly on virtual threads
-  once Quarkus dispatcher is configured (done in Milestone 4)
+- Virtual threads are stable in Java 21 LTS; no preview flag needed for basic usage
+- Structured concurrency (`StructuredTaskScope`) is still preview (milestone 5+)
+- Quarkus 3.8.6 handles virtual thread integration transparently for blocking I/O
+- No code changes to repositories; just verification and documentation

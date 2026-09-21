@@ -110,7 +110,20 @@ more than shipping speed.
   tests for that behavior (unit tests for domain logic, `@QuarkusTest` /
   Dev Services-backed integration tests for the REST/persistence/messaging layers).
 
-## Suggested milestones
+## Completed milestones
+
+1. **✅ Bootstrap** (commit `86ec1ae`)
+   - Quarkus project skeleton with health check endpoint, project structure, CI-friendly build
+2. **✅ Domain model** (commit `171e5cd`)
+   - Sealed `Reservation` hierarchy, `InventoryItem`, `Tenant` as records with unit tests
+3. **✅ Persistence** (commit `e7508ac`)
+   - Blocking JDBC Panache repositories for all three services (TenantRepository, InventoryItemRepository, ReservationRepository)
+   - JPA entities with multi-tenancy support (indexes on tenant_id, status)
+   - Dev Services configuration (PostgreSQL auto-start on `mvn quarkus:dev`)
+   - 52 integration tests passing (5 Tenant + 7 Inventory + 12 Reservation + 28 domain model tests)
+   - Sealed type conversion using Java 21 pattern matching (Reservation entity ↔ domain types)
+
+## Suggested milestones (remaining)
 
 1. **Bootstrap**: Quarkus project skeleton named `loomcrete`, health check
    endpoint, project structure, CI-friendly build (`mvn verify` passes), this

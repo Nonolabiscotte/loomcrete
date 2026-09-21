@@ -122,29 +122,22 @@ more than shipping speed.
    - Dev Services configuration (PostgreSQL auto-start on `mvn quarkus:dev`)
    - 52 integration tests passing (5 Tenant + 7 Inventory + 12 Reservation + 28 domain model tests)
    - Sealed type conversion using Java 21 pattern matching (Reservation entity ↔ domain types)
-4. **✅ Virtual threads** (commit in progress)
+4. **✅ Virtual threads** (commit `20a0dbe`)
    - Service layer (TenantService, InventoryService, ReservationService) using blocking repository calls
    - Verified Quarkus 3.8.6 automatically dispatches blocking JDBC onto virtual threads
    - Added "Virtual Threads & Blocking JDBC" documentation to README
    - All 52 tests passing on virtual threads (no explicit `@RunOnVirtualThread` needed)
    - Foundation for structured concurrency in Milestone 5
+5. **✅ Structured Concurrency** (commit `9f51865`)
+   - REST endpoint `POST /reservations` using `StructuredTaskScope` for parallel checks
+   - Three parallel subtasks: inventory availability, pricing calculation, fraud detection
+   - Automatic cancellation propagation if any check fails
+   - Manual CDI request context activation in structured tasks (workaround for virtual thread context)
+   - 7 integration tests: success path + inventory/pricing/fraud failure scenarios
+   - 71 total tests passing (7 new for Milestone 5)
 
 ## Suggested milestones (remaining)
 
-1. **Bootstrap**: Quarkus project skeleton named `loomcrete`, health check
-   endpoint, project structure, CI-friendly build (`mvn verify` passes), this
-   CLAUDE.md and a basic README.
-2. **Domain model**: sealed `Reservation` hierarchy, `InventoryItem`, `Tenant` as
-   records, with unit tests for state transitions via pattern matching.
-3. **Persistence**: blocking JDBC Panache repositories, Dev Services wired for
-   local dev and tests, basic CRUD for inventory and reservations.
-4. **Virtual threads**: apply `@RunOnVirtualThread` to the blocking persistence
-   layer, verify JDBC calls are dispatched onto virtual threads, short load test
-   showing request throughput vs platform threads.
-5. **Reservation creation flow with structured concurrency**: REST endpoint that
-   uses `StructuredTaskScope` to fan out the parallel checks (inventory availability,
-   pricing, fraud/rate-limit check) described above, returns `Confirmed` or a
-   clear failure reason.
 6. **Domain events over Kafka**: publish events on every state transition,
    consumer(s) that at minimum log/record them. *(Native smoke-build checkpoint:*
    *verify GraalVM native image still builds after Kafka integration.)*

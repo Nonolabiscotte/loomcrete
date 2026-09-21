@@ -146,7 +146,7 @@ See [CLAUDE.md](CLAUDE.md) for:
 ## Milestones
 
 1. ✅ **Bootstrap** — Project skeleton, health checks, multi-module setup
-2. ⬜ **Domain Model** — Sealed `Reservation` hierarchy, `InventoryItem`, `Tenant` records, unit tests
+2. ✅ **Domain Model** — Sealed `Reservation` hierarchy, `InventoryItem`, `Tenant` records, unit tests
 3. ⬜ **Persistence** — Panache repositories, Dev Services, basic CRUD
 4. ⬜ **Virtual Threads** — Apply `@RunOnVirtualThread` to persistence layer, load test
 5. ⬜ **Structured Concurrency** — Reservation creation with `StructuredTaskScope`, parallel checks

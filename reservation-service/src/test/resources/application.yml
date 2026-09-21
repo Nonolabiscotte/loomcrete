@@ -1,0 +1,17 @@
+quarkus:
+  datasource:
+    db-kind: h2
+    jdbc:
+      url: jdbc:h2:mem:test
+    username: sa
+    password: ""
+  devservices:
+    enabled: false
+  hibernate-orm:
+    database:
+      generation: drop-and-create
+
+logging:
+  level:
+    root: INFO
+    dev.noe.loomcrete: DEBUG

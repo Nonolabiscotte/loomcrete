@@ -12,7 +12,7 @@ quarkus:
     username: loomcrete
     password: loomcrete-dev
   devservices:
-    enabled: false
+    enabled: true
   hibernate-orm:
     database:
       generation: drop-and-create

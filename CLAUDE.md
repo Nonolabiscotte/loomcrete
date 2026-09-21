@@ -122,6 +122,12 @@ more than shipping speed.
    - Dev Services configuration (PostgreSQL auto-start on `mvn quarkus:dev`)
    - 52 integration tests passing (5 Tenant + 7 Inventory + 12 Reservation + 28 domain model tests)
    - Sealed type conversion using Java 21 pattern matching (Reservation entity ↔ domain types)
+4. **✅ Virtual threads** (commit in progress)
+   - Service layer (TenantService, InventoryService, ReservationService) using blocking repository calls
+   - Verified Quarkus 3.8.6 automatically dispatches blocking JDBC onto virtual threads
+   - Added "Virtual Threads & Blocking JDBC" documentation to README
+   - All 52 tests passing on virtual threads (no explicit `@RunOnVirtualThread` needed)
+   - Foundation for structured concurrency in Milestone 5
 
 ## Suggested milestones (remaining)
 

@@ -6,7 +6,7 @@ Progress tracking for loomcrete development.
 
 - [x] 1. **Bootstrap** — Quarkus project skeleton, health check endpoint, project structure, CI-friendly build
 - [x] 2. **Domain model** — sealed `Reservation` hierarchy, `InventoryItem`, `Tenant` records, unit tests
-- [ ] 3. **Persistence** — blocking JDBC Panache repositories, Dev Services, basic CRUD
+- [x] 3. **Persistence** — blocking JDBC Panache repositories, Dev Services, basic CRUD
 - [ ] 4. **Virtual threads** — apply `@RunOnVirtualThread` to persistence layer, load test vs platform threads
 - [ ] 5. **Reservation creation flow with structured concurrency** — REST endpoint using `StructuredTaskScope`
 - [ ] 6. **Domain events over Kafka** — publish events on state transitions, consumer logging

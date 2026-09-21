@@ -74,18 +74,30 @@ more than shipping speed.
 
 **Always implement step by step. Never jump ahead to later milestones.**
 
-- Work through the milestones below in order. Do not start milestone N+1 until
-  milestone N compiles, has passing tests, and has been explicitly confirmed
-  ("looks good, continue") by the user.
-- Each milestone should be small enough to review in one sitting. If a milestone
-  feels big, propose splitting it before starting.
-- At the start of each milestone, briefly state the plan for that milestone (files
-  to touch, key decisions) before writing code. Keep this short — a few sentences,
-  not an essay.
-- After each milestone: run the build and tests, report the result honestly
-  (including anything that doesn't work yet), and stop for confirmation before
-  moving on. Do not silently start the next milestone in the same turn.
-- Commit at the end of each milestone with a clear, conventional commit message.
+### Implementation Planning & Scope
+
+**IMPORTANT:** At the start of every implementation task:
+
+1. **Check `context/current-feature.md`** — it is the source of truth for the active
+   milestone's requirements, acceptance criteria, and implementation plan. Follow it.
+2. **Create a humanly-scoped implementation plan** before writing any code:
+   - Break the milestone into focused steps small enough to code and test in 15–30 minutes
+   - Each step should be reviewable, testable, and self-contained
+   - Explain *why* each step matters and *what* code change it introduces
+   - Aim for clarity: a reader should understand the problem being solved, not just the code
+3. **Present the plan to the user** for approval. Do not start coding until approved.
+4. **Execute step-by-step**: code one step, test it, wait for user approval, then move to
+   the next step. Do not batch multiple steps in a single turn unless the user asks.
+5. **Report results after each step**: build status, test results, blockers, what changed.
+   Stop for feedback before proceeding.
+
+### General Principles
+
+- Work through the milestones in order. Do not start milestone N+1 until milestone N
+  compiles, has passing tests, and has been explicitly confirmed by the user.
+- Each milestone should be small enough to review in one sitting. If it feels big,
+  propose splitting it before starting.
+- Commit at the end of each completed milestone with a clear, conventional commit message.
   One milestone = one (or a few) focused commits, not one giant commit at the end.
 - Prefer explaining *why* a Java 21/Quarkus feature is used in a given spot over
   just using it — this project's goal is understanding, not just working code.

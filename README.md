@@ -117,6 +117,44 @@ docker-compose -f docker-compose.local.yml down
 docker volume rm loomcrete_postgres-data
 ```
 
+## Virtual Threads & Blocking JDBC
+
+This project uses **blocking JDBC** with **virtual threads** as its persistence strategy, rather than reactive (async/non-blocking) frameworks like R2DBC or Vert.x Reactive Postgres.
+
+### Why Virtual Threads + Blocking JDBC?
+
+**Virtual Threads** (Java 21 feature) are lightweight threads managed by the JVM. Thousands can run concurrently without the overhead of platform threads.
+
+**Blocking JDBC** traditionally wastes a platform thread while waiting for I/O. With **virtual threads**, blocking I/O is efficient:
+- A virtual thread blocks on I/O but releases its carrier thread (platform thread)
+- The carrier thread can then run thousands of other virtual threads
+- Result: High concurrency without complex reactive code
+
+**Why not Reactive (R2DBC)?**
+- Reactive code is harder to reason about (nested callbacks, error handling, streaming)
+- Virtual threads + blocking JDBC are simpler, more maintainable, and nearly as efficient
+- Blocking code still performs well because virtual threads are cheap
+
+### How It Works in Loomcrete
+
+Quarkus 3.8.6 automatically dispatches blocking JDBC/Hibernate calls onto virtual threads when using Panache repositories. No code changes needed — this is the default behavior.
+
+**Configuration (reference — defaults are used):**
+```yaml
+quarkus:
+  executor:
+    core-threads: 1  # Virtual thread executor
+  virtual-threads:
+    enabled: true    # Default; no need to set explicitly
+```
+
+When you apply `@RunOnVirtualThread` to a method (starting in Milestone 5), Quarkus ensures that method and all its blocking I/O calls execute on a virtual thread, improving request throughput under load.
+
+### Further Reading
+
+- [Java 21 Virtual Threads (JEP 444)](https://openjdk.org/jeps/444)
+- [Quarkus Virtual Threads Guide](https://quarkus.io/guides/virtual-threads)
+
 ## Project Structure
 
 ```

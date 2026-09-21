@@ -63,12 +63,25 @@ Java 21 virtual threads: high concurrent load without manual thread-pool tuning.
 
 ## Status
 
-- [ ] Spec approved
-- [ ] Build started
-- [ ] Tests passing
+- [x] Spec approved
+- [x] Build started
+- [ ] Tests passing (running...)
 - [ ] Feature complete
 - [ ] Code review passed
 - [ ] Ready to merge
+
+## Progress
+
+**Step 1 (Complete):**
+- Verified Quarkus 3.8.6 uses virtual threads by default for blocking JDBC
+- Added "Virtual Threads & Blocking JDBC" section to README
+
+**Step 2 (In Progress):**
+- Created ReservationService with methods using blocking repository calls
+- Created TenantService with similar pattern
+- Created InventoryService with similar pattern
+- Added thread logging to verify virtual thread execution (DEBUG level)
+- All methods rely on Quarkus automatic dispatch to virtual threads (no explicit annotation needed)
 
 ## Blockers
 

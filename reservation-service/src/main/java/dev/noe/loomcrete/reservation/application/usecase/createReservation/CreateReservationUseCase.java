@@ -1,7 +1,6 @@
 package dev.noe.loomcrete.reservation.application.usecase.createReservation;
 
 import dev.noe.loomcrete.domain.reservations.Confirmed;
-import dev.noe.loomcrete.domain.reservations.Pending;
 import dev.noe.loomcrete.inventory.service.InventoryService;
 import dev.noe.loomcrete.reservation.domain.ReservationService;
 import dev.noe.loomcrete.reservation.infrastructure.ReservationEntity;
@@ -15,7 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 import java.time.Instant;
-import java.util.UUID;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.concurrent.TimeoutException;
 
@@ -61,25 +59,12 @@ public class CreateReservationUseCase {
                 return failureResult;
             }
 
-            // All checks passed, create reservation
-            String reservationId = UUID.randomUUID().toString();
-            Instant now = Instant.now();
-
-            Pending pending = new Pending(
-                reservationId,
-                tenantId,
-                inventoryItemId,
-                quantity,
-                now
-            );
-
-            Confirmed confirmed = pending.confirm();
-
+            // All checks passed, create confirmed reservation
+            Confirmed confirmed = Confirmed.create(tenantId, inventoryItemId, quantity);
             ReservationEntity entity = ReservationEntity.from(confirmed);
-            
             reservationService.persistReservation(entity);
 
-            LOG.infof("Reservation created successfully: id=%s", reservationId);
+            LOG.infof("Reservation created successfully: id=%s", confirmed.id());
             return new CreateReservationSuccess(confirmed);
         }
     }

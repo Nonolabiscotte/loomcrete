@@ -1,6 +1,7 @@
 package dev.noe.loomcrete.domain.reservations;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record Confirmed(
     String id,
@@ -29,5 +30,17 @@ public record Confirmed(
         if (confirmedAt == null) {
             throw new IllegalArgumentException("Reservation confirmedAt cannot be null");
         }
+    }
+
+    public static Confirmed create(String tenantId, String inventoryItemId, int quantity) {
+        Instant now = Instant.now();
+        return new Confirmed(
+            UUID.randomUUID().toString(),
+            tenantId,
+            inventoryItemId,
+            quantity,
+            now,
+            now
+        );
     }
 }

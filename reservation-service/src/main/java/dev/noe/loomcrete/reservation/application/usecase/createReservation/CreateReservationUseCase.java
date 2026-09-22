@@ -55,9 +55,10 @@ public class CreateReservationUseCase {
             var fraudTask = scope.fork(new FraudDetectionCheck(tenantId));
 
             var checkTasks = new CheckTasks(inventoryTask, pricingTask, fraudTask);
-            CreateReservationResult validationResult = validateChecks(scope, checkTasks);
-            if (validationResult != null) {
-                return validationResult;
+            CreateReservationResult failureResult = validateChecks(scope, checkTasks);
+
+            if (failureResult != null) {
+                return failureResult;
             }
 
             // All checks passed, create reservation
@@ -73,7 +74,9 @@ public class CreateReservationUseCase {
             );
 
             Confirmed confirmed = pending.confirm();
+
             ReservationEntity entity = ReservationEntity.from(confirmed);
+            
             reservationService.persistReservation(entity);
 
             LOG.infof("Reservation created successfully: id=%s", reservationId);
@@ -84,6 +87,7 @@ public class CreateReservationUseCase {
     private CreateReservationResult validateChecks(
             StructuredTaskScope<Object> scope,
             CheckTasks checks) {
+                
         try {
             scope.joinUntil(Instant.now().plusSeconds(5));
         } catch (InterruptedException e) {
@@ -101,6 +105,7 @@ public class CreateReservationUseCase {
             LOG.errorf("Inventory check failed: %s", ex.getMessage());
             return new CreateReservationFailure("Inventory check failed");
         }
+
         InventoryCheckResult inventoryResult = (InventoryCheckResult) checks.inventory().get();
         if (!inventoryResult.success()) {
             LOG.warnf("Inventory check failed: %s", inventoryResult.details());
@@ -113,6 +118,7 @@ public class CreateReservationUseCase {
             LOG.errorf("Pricing check failed: %s", ex.getMessage());
             return new CreateReservationFailure("Pricing check failed");
         }
+
         PricingCheckResult pricingResult = (PricingCheckResult) checks.pricing().get();
         if (!pricingResult.success()) {
             LOG.warnf("Pricing check failed: %s", pricingResult.details());
@@ -125,6 +131,7 @@ public class CreateReservationUseCase {
             LOG.errorf("Fraud check failed: %s", ex.getMessage());
             return new CreateReservationFailure("Fraud check failed");
         }
+
         FraudCheckResult fraudResult = (FraudCheckResult) checks.fraud().get();
         if (!fraudResult.success()) {
             LOG.warnf("Fraud check failed: %s", fraudResult.details());

@@ -5,6 +5,8 @@ import dev.noe.loomcrete.reservation.api.dto.out.ReservationResponse;
 import dev.noe.loomcrete.reservation.api.dto.out.ErrorResponse;
 import dev.noe.loomcrete.reservation.application.CreateReservationUseCase;
 import dev.noe.loomcrete.reservation.application.CreateReservationResult;
+import dev.noe.loomcrete.reservation.application.CreateReservationSuccess;
+import dev.noe.loomcrete.reservation.application.CreateReservationFailure;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -33,8 +35,8 @@ public class ReservationResource {
             request.quantity()
         );
 
-        if (result instanceof CreateReservationResult.Success success) {
-            var confirmed = success.confirmed;
+        if (result instanceof CreateReservationSuccess success) {
+            var confirmed = success.confirmed();
             var response = new ReservationResponse(
                 confirmed.id(),
                 confirmed.tenantId(),
@@ -45,10 +47,10 @@ public class ReservationResource {
                 confirmed.confirmedAt()
             );
             return Response.status(201).entity(response).build();
-        } else if (result instanceof CreateReservationResult.Failure failure) {
-            LOG.warnf("Reservation creation failed: %s", failure.error);
+        } else if (result instanceof CreateReservationFailure failure) {
+            LOG.warnf("Reservation creation failed: %s", failure.error());
             return Response.status(400)
-                .entity(new ErrorResponse(failure.error))
+                .entity(new ErrorResponse(failure.error()))
                 .build();
         }
 

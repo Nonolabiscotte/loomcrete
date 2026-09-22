@@ -2,6 +2,8 @@ package dev.noe.loomcrete.reservation.application;
 
 import dev.noe.loomcrete.domain.reservations.Confirmed;
 import dev.noe.loomcrete.domain.reservations.Pending;
+import dev.noe.loomcrete.reservation.application.CreateReservationSuccess;
+import dev.noe.loomcrete.reservation.application.CreateReservationFailure;
 import dev.noe.loomcrete.inventory.service.InventoryService;
 import dev.noe.loomcrete.reservation.domain.ReservationService;
 import dev.noe.loomcrete.reservation.infrastructure.ReservationEntity;
@@ -35,13 +37,13 @@ public class CreateReservationUseCase {
 
         // Validate input
         if (tenantId == null || tenantId.isEmpty()) {
-            return CreateReservationResult.failure("Tenant ID is required");
+            return new CreateReservationFailure("Tenant ID is required");
         }
         if (inventoryItemId == null || inventoryItemId.isEmpty()) {
-            return CreateReservationResult.failure("Inventory item ID is required");
+            return new CreateReservationFailure("Inventory item ID is required");
         }
         if (quantity <= 0) {
-            return CreateReservationResult.failure("Quantity must be positive");
+            return new CreateReservationFailure("Quantity must be positive");
         }
 
         // Run parallel checks using structured concurrency
@@ -59,49 +61,49 @@ public class CreateReservationUseCase {
             } catch (InterruptedException e) {
                 LOG.errorf("Structured task scope interrupted: %s", e.getMessage());
                 Thread.currentThread().interrupt();
-                return CreateReservationResult.failure("Request was interrupted");
+                return new CreateReservationFailure("Request was interrupted");
             } catch (TimeoutException e) {
                 LOG.errorf("Reservation checks timed out: %s", e.getMessage());
-                return CreateReservationResult.failure("Reservation checks timed out");
+                return new CreateReservationFailure("Reservation checks timed out");
             }
 
             // Check inventory
             if (inventoryTask.state() == StructuredTaskScope.Subtask.State.FAILED) {
                 Throwable ex = inventoryTask.exception();
                 LOG.errorf("Inventory check failed: %s", ex.getMessage());
-                return CreateReservationResult.failure("Inventory check failed");
+                return new CreateReservationFailure("Inventory check failed");
             }
             Object inventoryObj = inventoryTask.get();
             InventoryCheckResult inventoryResult = (InventoryCheckResult) inventoryObj;
             if (!inventoryResult.success()) {
                 LOG.warnf("Inventory check failed: %s", inventoryResult.details());
-                return CreateReservationResult.failure(inventoryResult.details());
+                return new CreateReservationFailure(inventoryResult.details());
             }
 
             // Check pricing
             if (pricingTask.state() == StructuredTaskScope.Subtask.State.FAILED) {
                 Throwable ex = pricingTask.exception();
                 LOG.errorf("Pricing check failed: %s", ex.getMessage());
-                return CreateReservationResult.failure("Pricing check failed");
+                return new CreateReservationFailure("Pricing check failed");
             }
             Object pricingObj = pricingTask.get();
             PricingCheckResult pricingResult = (PricingCheckResult) pricingObj;
             if (!pricingResult.success()) {
                 LOG.warnf("Pricing check failed: %s", pricingResult.details());
-                return CreateReservationResult.failure((String) pricingResult.details());
+                return new CreateReservationFailure((String) pricingResult.details());
             }
 
             // Check fraud
             if (fraudTask.state() == StructuredTaskScope.Subtask.State.FAILED) {
                 Throwable ex = fraudTask.exception();
                 LOG.errorf("Fraud check failed: %s", ex.getMessage());
-                return CreateReservationResult.failure("Fraud check failed");
+                return new CreateReservationFailure("Fraud check failed");
             }
             Object fraudObj = fraudTask.get();
             FraudCheckResult fraudResult = (FraudCheckResult) fraudObj;
             if (!fraudResult.success()) {
                 LOG.warnf("Fraud check failed: %s", fraudResult.details());
-                return CreateReservationResult.failure(fraudResult.details());
+                return new CreateReservationFailure(fraudResult.details());
             }
 
             // All checks passed, create reservation
@@ -121,7 +123,7 @@ public class CreateReservationUseCase {
             reservationService.persistReservation(entity);
 
             LOG.infof("Reservation created successfully: id=%s", reservationId);
-            return CreateReservationResult.success(confirmed);
+            return new CreateReservationSuccess(confirmed);
         }
     }
 }

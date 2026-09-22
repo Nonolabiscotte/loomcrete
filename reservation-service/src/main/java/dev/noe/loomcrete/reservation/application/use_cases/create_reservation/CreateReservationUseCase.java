@@ -1,9 +1,7 @@
-package dev.noe.loomcrete.reservation.application;
+package dev.noe.loomcrete.reservation.application.use_cases.create_reservation;
 
 import dev.noe.loomcrete.domain.reservations.Confirmed;
 import dev.noe.loomcrete.domain.reservations.Pending;
-import dev.noe.loomcrete.reservation.application.CreateReservationSuccess;
-import dev.noe.loomcrete.reservation.application.CreateReservationFailure;
 import dev.noe.loomcrete.inventory.service.InventoryService;
 import dev.noe.loomcrete.reservation.domain.ReservationService;
 import dev.noe.loomcrete.reservation.infrastructure.ReservationEntity;

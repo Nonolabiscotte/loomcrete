@@ -3,10 +3,10 @@ package dev.noe.loomcrete.reservation.api;
 import dev.noe.loomcrete.reservation.api.dto.in.CreateReservationRequest;
 import dev.noe.loomcrete.reservation.api.dto.out.ReservationResponse;
 import dev.noe.loomcrete.reservation.api.dto.out.ErrorResponse;
-import dev.noe.loomcrete.reservation.application.usecase.create_reservation.CreateReservationUseCase;
-import dev.noe.loomcrete.reservation.application.usecase.create_reservation.CreateReservationResult;
-import dev.noe.loomcrete.reservation.application.usecase.create_reservation.CreateReservationSuccess;
-import dev.noe.loomcrete.reservation.application.usecase.create_reservation.CreateReservationFailure;
+import dev.noe.loomcrete.reservation.application.usecase.createReservation.CreateReservationUseCase;
+import dev.noe.loomcrete.reservation.application.usecase.createReservation.CreateReservationResult;
+import dev.noe.loomcrete.reservation.application.usecase.createReservation.CreateReservationSuccess;
+import dev.noe.loomcrete.reservation.application.usecase.createReservation.CreateReservationFailure;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -21,6 +21,7 @@ import org.jboss.logging.Logger;
 @Path("/reservations")
 @Produces(MediaType.APPLICATION_JSON)
 public class ReservationResource {
+    
     private static final Logger LOG = Logger.getLogger(ReservationResource.class);
 
     @Inject

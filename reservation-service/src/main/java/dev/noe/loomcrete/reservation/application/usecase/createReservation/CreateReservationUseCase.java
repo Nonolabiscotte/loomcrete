@@ -1,4 +1,4 @@
-package dev.noe.loomcrete.reservation.application.usecase.create_reservation;
+package dev.noe.loomcrete.reservation.application.usecase.createReservation;
 
 import dev.noe.loomcrete.domain.reservations.Confirmed;
 import dev.noe.loomcrete.domain.reservations.Pending;

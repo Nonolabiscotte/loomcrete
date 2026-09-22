@@ -54,54 +54,10 @@ public class CreateReservationUseCase {
             var pricingTask = scope.fork(new PricingValidationCheck(quantity));
             var fraudTask = scope.fork(new FraudDetectionCheck(tenantId));
 
-            try {
-                scope.joinUntil(Instant.now().plusSeconds(5));
-            } catch (InterruptedException e) {
-                LOG.errorf("Structured task scope interrupted: %s", e.getMessage());
-                Thread.currentThread().interrupt();
-                return new CreateReservationFailure("Request was interrupted");
-            } catch (TimeoutException e) {
-                LOG.errorf("Reservation checks timed out: %s", e.getMessage());
-                return new CreateReservationFailure("Reservation checks timed out");
-            }
-
-            // Check inventory
-            if (inventoryTask.state() == StructuredTaskScope.Subtask.State.FAILED) {
-                Throwable ex = inventoryTask.exception();
-                LOG.errorf("Inventory check failed: %s", ex.getMessage());
-                return new CreateReservationFailure("Inventory check failed");
-            }
-            Object inventoryObj = inventoryTask.get();
-            InventoryCheckResult inventoryResult = (InventoryCheckResult) inventoryObj;
-            if (!inventoryResult.success()) {
-                LOG.warnf("Inventory check failed: %s", inventoryResult.details());
-                return new CreateReservationFailure(inventoryResult.details());
-            }
-
-            // Check pricing
-            if (pricingTask.state() == StructuredTaskScope.Subtask.State.FAILED) {
-                Throwable ex = pricingTask.exception();
-                LOG.errorf("Pricing check failed: %s", ex.getMessage());
-                return new CreateReservationFailure("Pricing check failed");
-            }
-            Object pricingObj = pricingTask.get();
-            PricingCheckResult pricingResult = (PricingCheckResult) pricingObj;
-            if (!pricingResult.success()) {
-                LOG.warnf("Pricing check failed: %s", pricingResult.details());
-                return new CreateReservationFailure((String) pricingResult.details());
-            }
-
-            // Check fraud
-            if (fraudTask.state() == StructuredTaskScope.Subtask.State.FAILED) {
-                Throwable ex = fraudTask.exception();
-                LOG.errorf("Fraud check failed: %s", ex.getMessage());
-                return new CreateReservationFailure("Fraud check failed");
-            }
-            Object fraudObj = fraudTask.get();
-            FraudCheckResult fraudResult = (FraudCheckResult) fraudObj;
-            if (!fraudResult.success()) {
-                LOG.warnf("Fraud check failed: %s", fraudResult.details());
-                return new CreateReservationFailure(fraudResult.details());
+            var checkTasks = new CheckTasks(inventoryTask, pricingTask, fraudTask);
+            CreateReservationResult validationResult = validateChecks(scope, checkTasks);
+            if (validationResult != null) {
+                return validationResult;
             }
 
             // All checks passed, create reservation
@@ -123,5 +79,58 @@ public class CreateReservationUseCase {
             LOG.infof("Reservation created successfully: id=%s", reservationId);
             return new CreateReservationSuccess(confirmed);
         }
+    }
+
+    private CreateReservationResult validateChecks(
+            StructuredTaskScope<Object> scope,
+            CheckTasks checks) {
+        try {
+            scope.joinUntil(Instant.now().plusSeconds(5));
+        } catch (InterruptedException e) {
+            LOG.errorf("Structured task scope interrupted: %s", e.getMessage());
+            Thread.currentThread().interrupt();
+            return new CreateReservationFailure("Request was interrupted");
+        } catch (TimeoutException e) {
+            LOG.errorf("Reservation checks timed out: %s", e.getMessage());
+            return new CreateReservationFailure("Reservation checks timed out");
+        }
+
+        // Check inventory
+        if (checks.inventory().state() == StructuredTaskScope.Subtask.State.FAILED) {
+            Throwable ex = checks.inventory().exception();
+            LOG.errorf("Inventory check failed: %s", ex.getMessage());
+            return new CreateReservationFailure("Inventory check failed");
+        }
+        InventoryCheckResult inventoryResult = (InventoryCheckResult) checks.inventory().get();
+        if (!inventoryResult.success()) {
+            LOG.warnf("Inventory check failed: %s", inventoryResult.details());
+            return new CreateReservationFailure(inventoryResult.details());
+        }
+
+        // Check pricing
+        if (checks.pricing().state() == StructuredTaskScope.Subtask.State.FAILED) {
+            Throwable ex = checks.pricing().exception();
+            LOG.errorf("Pricing check failed: %s", ex.getMessage());
+            return new CreateReservationFailure("Pricing check failed");
+        }
+        PricingCheckResult pricingResult = (PricingCheckResult) checks.pricing().get();
+        if (!pricingResult.success()) {
+            LOG.warnf("Pricing check failed: %s", pricingResult.details());
+            return new CreateReservationFailure((String) pricingResult.details());
+        }
+
+        // Check fraud
+        if (checks.fraud().state() == StructuredTaskScope.Subtask.State.FAILED) {
+            Throwable ex = checks.fraud().exception();
+            LOG.errorf("Fraud check failed: %s", ex.getMessage());
+            return new CreateReservationFailure("Fraud check failed");
+        }
+        FraudCheckResult fraudResult = (FraudCheckResult) checks.fraud().get();
+        if (!fraudResult.success()) {
+            LOG.warnf("Fraud check failed: %s", fraudResult.details());
+            return new CreateReservationFailure(fraudResult.details());
+        }
+
+        return null;
     }
 }

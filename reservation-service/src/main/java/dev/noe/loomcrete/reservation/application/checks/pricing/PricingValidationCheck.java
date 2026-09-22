@@ -1,9 +1,9 @@
-package dev.noe.loomcrete.reservation.task;
+package dev.noe.loomcrete.reservation.application.checks.pricing;
 
 import java.math.BigDecimal;
 import java.util.concurrent.Callable;
 
-public record PricingCheckTask(int quantity) implements Callable<Object> {
+public record PricingValidationCheck(int quantity) implements Callable<Object> {
 
     @Override
     public Object call() throws Exception {

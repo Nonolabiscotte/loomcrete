@@ -5,12 +5,12 @@ import dev.noe.loomcrete.domain.reservations.Pending;
 import dev.noe.loomcrete.inventory.service.InventoryService;
 import dev.noe.loomcrete.reservation.domain.ReservationService;
 import dev.noe.loomcrete.reservation.infrastructure.ReservationEntity;
-import dev.noe.loomcrete.reservation.task.FraudCheckTask;
-import dev.noe.loomcrete.reservation.task.FraudCheckResult;
-import dev.noe.loomcrete.reservation.task.InventoryCheckTask;
-import dev.noe.loomcrete.reservation.task.InventoryCheckResult;
-import dev.noe.loomcrete.reservation.task.PricingCheckTask;
-import dev.noe.loomcrete.reservation.task.PricingCheckResult;
+import dev.noe.loomcrete.reservation.application.checks.fraud.FraudDetectionCheck;
+import dev.noe.loomcrete.reservation.application.checks.fraud.FraudCheckResult;
+import dev.noe.loomcrete.reservation.application.checks.inventory.InventoryAvailabilityCheck;
+import dev.noe.loomcrete.reservation.application.checks.inventory.InventoryCheckResult;
+import dev.noe.loomcrete.reservation.application.checks.pricing.PricingValidationCheck;
+import dev.noe.loomcrete.reservation.application.checks.pricing.PricingCheckResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
@@ -46,13 +46,13 @@ public class CreateReservationUseCase {
 
         // Run parallel checks using structured concurrency
         try (var scope = new StructuredTaskScope<Object>()) {
-            var inventoryTask = scope.fork(new InventoryCheckTask(
+            var inventoryTask = scope.fork(new InventoryAvailabilityCheck(
                 inventoryService,
                 inventoryItemId,
                 quantity
             ));
-            var pricingTask = scope.fork(new PricingCheckTask(quantity));
-            var fraudTask = scope.fork(new FraudCheckTask(tenantId));
+            var pricingTask = scope.fork(new PricingValidationCheck(quantity));
+            var fraudTask = scope.fork(new FraudDetectionCheck(tenantId));
 
             try {
                 scope.joinUntil(Instant.now().plusSeconds(5));

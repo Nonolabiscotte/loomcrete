@@ -1,4 +1,4 @@
-package dev.noe.loomcrete.reservation.task;
+package dev.noe.loomcrete.reservation.application.checks.inventory;
 
 import dev.noe.loomcrete.inventory.infrastructure.InventoryItemEntity;
 import dev.noe.loomcrete.inventory.service.InventoryService;
@@ -6,7 +6,7 @@ import io.quarkus.arc.Arc;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-public record InventoryCheckTask(
+public record InventoryAvailabilityCheck(
     InventoryService inventoryService,
     String itemId,
     int requestedQuantity

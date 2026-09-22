@@ -1,8 +1,8 @@
-package dev.noe.loomcrete.reservation.task;
+package dev.noe.loomcrete.reservation.application.checks.fraud;
 
 import java.util.concurrent.Callable;
 
-public record FraudCheckTask(String tenantId) implements Callable<Object> {
+public record FraudDetectionCheck(String tenantId) implements Callable<Object> {
 
     @Override
     public Object call() throws Exception {

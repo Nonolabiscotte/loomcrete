@@ -1,6 +1,5 @@
-package dev.noe.loomcrete.reservation;
+package dev.noe.loomcrete.reservation.api;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -8,7 +7,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Path("/")
-public class ReservationMain {
+public class ReservationHealthResource {
 
     @GET
     @Path("health")

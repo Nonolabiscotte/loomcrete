@@ -1,4 +1,4 @@
-package dev.noe.loomcrete.reservation.dto;
+package dev.noe.loomcrete.reservation.api.dto.out;
 
 import java.time.Instant;
 

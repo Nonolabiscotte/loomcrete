@@ -5,6 +5,7 @@ import dev.noe.loomcrete.domain.reservations.Confirmed;
 import dev.noe.loomcrete.domain.reservations.Expired;
 import dev.noe.loomcrete.domain.reservations.Pending;
 import dev.noe.loomcrete.domain.reservations.Reservation;
+import dev.noe.loomcrete.reservation.domain.ReservationStatus;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -25,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReservationRepositoryTest {
 
     @Inject
-    ReservationRepository repository;
+    ReservationJpaRepository repository;
 
     @BeforeEach
     @Transactional

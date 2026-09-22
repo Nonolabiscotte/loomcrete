@@ -1,4 +1,4 @@
-package dev.noe.loomcrete.reservation.dto;
+package dev.noe.loomcrete.reservation.api.dto.in;
 
 public record CreateReservationRequest(
     String tenantId,

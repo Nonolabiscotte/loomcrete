@@ -2,7 +2,7 @@ package dev.noe.loomcrete.reservation;
 
 import dev.noe.loomcrete.inventory.infrastructure.InventoryItemEntity;
 import dev.noe.loomcrete.inventory.infrastructure.InventoryItemRepository;
-import dev.noe.loomcrete.reservation.dto.CreateReservationRequest;
+import dev.noe.loomcrete.reservation.api.dto.in.CreateReservationRequest;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.common.mapper.TypeRef;
 import jakarta.inject.Inject;

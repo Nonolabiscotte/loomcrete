@@ -5,6 +5,7 @@ import dev.noe.loomcrete.domain.reservations.Confirmed;
 import dev.noe.loomcrete.domain.reservations.Expired;
 import dev.noe.loomcrete.domain.reservations.Pending;
 import dev.noe.loomcrete.domain.reservations.Reservation;
+import dev.noe.loomcrete.reservation.domain.ReservationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

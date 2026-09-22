@@ -1,7 +1,8 @@
 package dev.noe.loomcrete.reservation.service;
 
+import dev.noe.loomcrete.reservation.domain.ReservationService;
+import dev.noe.loomcrete.reservation.domain.ReservationStatus;
 import dev.noe.loomcrete.reservation.infrastructure.ReservationEntity;
-import dev.noe.loomcrete.reservation.infrastructure.ReservationStatus;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -24,7 +25,7 @@ class ReservationServiceTest {
 
     @Test
     void testGetReservationById_NotFound() {
-        Optional<ReservationEntity> result = reservationService.getReservationById("nonexistent-id");
+        var result = reservationService.getReservationById("nonexistent-id");
         assertFalse(result.isPresent(), "Should return empty Optional for non-existent reservation");
     }
 
@@ -44,12 +45,13 @@ class ReservationServiceTest {
         reservationService.persistReservation(reservation);
 
         // Assert: Retrieve via service
-        Optional<ReservationEntity> retrieved = reservationService.getReservationById("res-persist-1");
+        var retrieved = reservationService.getReservationById("res-persist-1");
         assertTrue(retrieved.isPresent(), "Should find persisted reservation");
-        assertEquals("tenant-persist", retrieved.get().tenantId);
-        assertEquals("item-1", retrieved.get().inventoryItemId);
-        assertEquals(5, retrieved.get().quantity);
-        assertEquals(ReservationStatus.PENDING, retrieved.get().status);
+        ReservationEntity entity = (ReservationEntity) retrieved.get();
+        assertEquals("tenant-persist", entity.tenantId);
+        assertEquals("item-1", entity.inventoryItemId);
+        assertEquals(5, entity.quantity);
+        assertEquals(ReservationStatus.PENDING, entity.status);
     }
 
     @Test
@@ -77,13 +79,13 @@ class ReservationServiceTest {
         reservationService.persistReservation(confirmed);
 
         // Act & Assert
-        List<ReservationEntity> pendingReservations = reservationService.listReservationsByTenantAndStatus(tenantId, ReservationStatus.PENDING);
+        var pendingReservations = reservationService.listReservationsByTenantAndStatus(tenantId, ReservationStatus.PENDING);
         assertEquals(1, pendingReservations.size());
-        assertEquals("res-pending-1", pendingReservations.get(0).id);
+        assertEquals("res-pending-1", ((ReservationEntity) pendingReservations.get(0)).id);
 
-        List<ReservationEntity> confirmedReservations = reservationService.listReservationsByTenantAndStatus(tenantId, ReservationStatus.CONFIRMED);
+        var confirmedReservations = reservationService.listReservationsByTenantAndStatus(tenantId, ReservationStatus.CONFIRMED);
         assertEquals(1, confirmedReservations.size());
-        assertEquals("res-confirmed-1", confirmedReservations.get(0).id);
+        assertEquals("res-confirmed-1", ((ReservationEntity) confirmedReservations.get(0)).id);
     }
 
     @Test
@@ -110,12 +112,12 @@ class ReservationServiceTest {
         reservationService.persistReservation(res2);
 
         // Act
-        List<ReservationEntity> expiredReservations = reservationService.listReservationsByStatus(ReservationStatus.EXPIRED);
+        var expiredReservations = reservationService.listReservationsByStatus(ReservationStatus.EXPIRED);
 
         // Assert: verify both test reservations are present
-        assertTrue(expiredReservations.stream().anyMatch(r -> r.id.equals("res-expired-test-1")));
-        assertTrue(expiredReservations.stream().anyMatch(r -> r.id.equals("res-expired-test-2")));
-        assertTrue(expiredReservations.stream().allMatch(r -> r.status == ReservationStatus.EXPIRED));
+        assertTrue(expiredReservations.stream().map(e -> (ReservationEntity) e).anyMatch(r -> r.id.equals("res-expired-test-1")));
+        assertTrue(expiredReservations.stream().map(e -> (ReservationEntity) e).anyMatch(r -> r.id.equals("res-expired-test-2")));
+        assertTrue(expiredReservations.stream().map(e -> (ReservationEntity) e).allMatch(r -> r.status == ReservationStatus.EXPIRED));
     }
 
     @Test
